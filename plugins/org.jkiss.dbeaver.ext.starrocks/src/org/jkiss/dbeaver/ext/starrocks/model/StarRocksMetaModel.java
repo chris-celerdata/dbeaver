@@ -63,7 +63,17 @@ public class StarRocksMetaModel extends GenericMetaModel {
         @NotNull GenericDataSource dataSource,
         @NotNull String catalogName
     ) {
-        return new StarRocksCatalog((StarRocksDataSource) dataSource, catalogName);
+        StarRocksDataSource starRocksDataSource = (StarRocksDataSource) dataSource;
+        StarRocksCatalog catalog = new StarRocksCatalog(starRocksDataSource, catalogName);
+
+        // Populate type and comment from cached metadata
+        StarRocksDataSource.CatalogMetadata metadata = starRocksDataSource.getCatalogMetadata(catalogName);
+        if (metadata != null) {
+            catalog.setType(metadata.type);
+            catalog.setComment(metadata.comment);
+        }
+
+        return catalog;
     }
 
     @Override

@@ -38,16 +38,30 @@ import org.jkiss.utils.CommonUtils;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * StarRocks DataSource - extends GenericDataSource with StarRocks-specific catalog loading
  */
 public class StarRocksDataSource extends GenericDataSource {
 
-    /**
-     * Default catalog name in StarRocks (internal catalog).
-     */
     public static final String DEFAULT_CATALOG_NAME = "default_catalog"; //$NON-NLS-1$
+
+    /**
+     * catalog name -> [type, comment]
+     */
+    private final Map<String, CatalogMetadata> catalogMetadataCache = new ConcurrentHashMap<>();
+
+    public static class CatalogMetadata {
+        public final String type;
+        public final String comment;
+
+        public CatalogMetadata(String type, String comment) {
+            this.type = type;
+            this.comment = comment;
+        }
+    }
 
     public StarRocksDataSource(
         @NotNull DBRProgressMonitor monitor,
@@ -98,12 +112,19 @@ public class StarRocksDataSource extends GenericDataSource {
         @Nullable DBSObjectFilter catalogFilters
     ) throws DBException {
         List<String> catalogNames = new ArrayList<>();
+        catalogMetadataCache.clear();
         try (JDBCSession session = DBUtils.openMetaSession(monitor, this, "Load StarRocks catalogs")) { //$NON-NLS-1$
             try (JDBCPreparedStatement dbStat = session.prepareStatement("SHOW CATALOGS")) { //$NON-NLS-1$
                 try (JDBCResultSet dbResult = dbStat.executeQuery()) {
                     while (dbResult.next()) {
                         String catalogName = JDBCUtils.safeGetString(dbResult, "Catalog"); //$NON-NLS-1$
+                        String catalogType = JDBCUtils.safeGetString(dbResult, "Type"); //$NON-NLS-1$
+                        String catalogComment = JDBCUtils.safeGetString(dbResult, "Comment"); //$NON-NLS-1$
+
                         if (catalogName != null) {
+                            // Store metadata for later use in createCatalogImpl
+                            catalogMetadataCache.put(catalogName, new CatalogMetadata(catalogType, catalogComment));
+
                             if (catalogFilters == null || catalogFilters.matches(catalogName)) {
                                 catalogNames.add(catalogName);
                             } else {
@@ -117,6 +138,11 @@ public class StarRocksDataSource extends GenericDataSource {
             throw new DBException("Error loading StarRocks catalogs", e);
         }
         return catalogNames;
+    }
+
+    @Nullable
+    public CatalogMetadata getCatalogMetadata(@NotNull String catalogName) {
+        return catalogMetadataCache.get(catalogName);
     }
 
     @Nullable
