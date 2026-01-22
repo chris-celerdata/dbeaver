@@ -88,26 +88,19 @@ public abstract class StarRocksTableBase extends GenericTableBase {
         GenericSchema schema = getSchema();
 
         if (catalog != null && schema != null) {
-            // Full 3-level FQN: catalog.schema.table
+            // catalog.schema.table
             return DBUtils.getFullQualifiedName(
                 getDataSource(),
                 catalog,
                 schema,
                 this);
         } else if (schema != null) {
-            // 2-level FQN: schema.table
+            // schema.table
             return DBUtils.getFullQualifiedName(
                 getDataSource(),
                 schema,
                 this);
-        } else if (catalog != null) {
-            // 2-level FQN: catalog.table (unusual but handle it)
-            return DBUtils.getFullQualifiedName(
-                getDataSource(),
-                catalog,
-                this);
         }
-        // Just table name
         return DBUtils.getQuotedIdentifier(getDataSource(), getName());
     }
 }
