@@ -150,15 +150,6 @@ public class StarRocksDataSource extends GenericDataSource {
         return (StarRocksCatalog) super.getCatalog(name);
     }
 
-    @Nullable
-    public StarRocksCatalog getDefaultCatalog() {
-        return getCatalog(DEFAULT_CATALOG_NAME);
-    }
-
-    public boolean isDefaultCatalog(@NotNull GenericCatalog catalog) {
-        return DEFAULT_CATALOG_NAME.equalsIgnoreCase(catalog.getName());
-    }
-
     @Override
     public boolean isOmitCatalog() {
         return false;

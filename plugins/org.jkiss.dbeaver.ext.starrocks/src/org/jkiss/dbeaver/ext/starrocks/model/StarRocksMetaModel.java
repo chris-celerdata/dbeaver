@@ -308,4 +308,12 @@ public class StarRocksMetaModel extends GenericMetaModel {
     public boolean supportsSynonyms(@NotNull GenericDataSource dataSource) {
         return false;
     }
+
+    @Override
+    public boolean isSystemSchema(GenericSchema schema) {
+        String schemaName = schema.getName();
+        return "information_schema".equalsIgnoreCase(schemaName) || //$NON-NLS-1$
+               "sys".equalsIgnoreCase(schemaName) || //$NON-NLS-1$
+               "_statistics_".equalsIgnoreCase(schemaName); //$NON-NLS-1$
+    }
 }

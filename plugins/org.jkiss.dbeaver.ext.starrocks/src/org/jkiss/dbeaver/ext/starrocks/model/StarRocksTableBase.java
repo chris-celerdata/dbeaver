@@ -74,11 +74,6 @@ public abstract class StarRocksTableBase extends GenericTableBase {
         return (StarRocksCatalog) getCatalog();
     }
 
-    @Nullable
-    public StarRocksDatabase getStarRocksSchema() {
-        return (StarRocksDatabase) getSchema();
-    }
-
     @NotNull
     @Override
     public String getFullyQualifiedName(DBPEvaluationContext context) {

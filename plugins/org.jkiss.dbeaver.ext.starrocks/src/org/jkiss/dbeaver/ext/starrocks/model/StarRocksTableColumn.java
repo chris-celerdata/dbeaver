@@ -97,11 +97,6 @@ public class StarRocksTableColumn extends GenericTableColumn {
         return (StarRocksDataSource) super.getDataSource();
     }
 
-    @Nullable
-    public StarRocksTableBase getStarRocksTable() {
-        return (StarRocksTableBase) getTable();
-    }
-
     private static int mapSqlType(String typeName) {
         if (typeName == null) {
             return Types.OTHER;
